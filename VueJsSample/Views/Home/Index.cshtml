@@ -1,0 +1,41 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+
+<div id="vue">
+    <h2>Message : {{ message }}.</h2>
+    <input id="callApiBtn" type="button" value="Get message from web API"/>
+</div>
+
+
+@section Scripts {
+    <script type="text/javascript">
+        
+        var indexPage = new Vue({
+            el: '#vue',
+            data: {
+                message: ""
+            }
+        });
+
+        function CallAPI() {
+            $.ajax({
+                url: '/api/RandomMessageAPI/Get',
+                success: function (data) {
+                    indexPage.message = data;
+                }
+            });
+        }
+
+        $(function () {            
+            time = setInterval(function () {
+                CallAPI();
+            }, 2500);
+
+            $("#callApiBtn").click(function () {
+                CallAPI();
+            });
+        });
+
+    </script>
+}
