@@ -3,14 +3,15 @@
 }
 
 <div id="vue">
-    <h2>Message : {{ message }}.</h2>
-    <input id="callApiBtn" type="button" value="Get message from web API"/>
+    <h2>Message : API returned {{ message }}.</h2>
+    <input class="btn btn-info" id="callApiBtn" type="button" value="Get message from web API" />
 </div>
 
+<canvas id="myChart" width="400" height="250"></canvas>
 
 @section Scripts {
     <script type="text/javascript">
-        
+
         var indexPage = new Vue({
             el: '#vue',
             data: {
@@ -23,14 +24,88 @@
                 url: '/api/RandomMessageAPI/Get',
                 success: function (data) {
                     indexPage.message = data;
+                    
+                    var updatedLabel = parseInt(config.data.labels[config.data.labels.length - 1]) + 2;
+                    config.data.labels.push(updatedLabel);
+                    config.data.datasets.forEach(function (dataset) {
+                        if (dataset.data.length == 10) {
+                            config.data.labels.shift();
+                            dataset.data.shift();
+                        }
+
+                        dataset.data.push(data);
+                    });
+
+                    window.myLine.update();
                 }
             });
-        }
+        };
 
-        $(function () {            
+        var config = {
+            type: 'line',
+            data: {
+                labels: ['0'],
+                datasets: [{
+                    label: 'live data',
+                    backgroundColor: "rgba(75,192,192,0.4)",
+                    borderColor: "rgba(75,192,192,1)",
+                    borderCapStyle: 'butt',
+                    borderDash: [],
+                    borderDashOffset: 0.0,
+                    lineTension: 0.1,
+                    borderJoinStyle: 'miter',
+                    pointBorderColor: "rgba(75,192,192,1)",
+                    pointBackgroundColor: "#fff",
+                    pointBorderWidth: 1,
+                    pointHoverRadius: 5,
+                    pointHoverBackgroundColor: "rgba(75,192,192,1)",
+                    pointHoverBorderColor: "rgba(220,220,220,1)",
+                    pointHoverBorderWidth: 2,
+                    pointRadius: 5,
+                    pointHitRadius: 10,
+                    data: [65],
+                    fill: false,
+                }]
+            },
+            options: {
+                responsive: true,
+                title: {
+                    display: true,
+                },
+                tooltips: {
+                    mode: 'index',
+                    intersect: false,
+                },
+                hover: {
+                    mode: 'nearest',
+                    intersect: true
+                },
+                scales: {
+                    xAxes: [{
+                        display: true,
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Seconds (s)'
+                        }
+                    }],
+                    yAxes: [{
+                        display: true,
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Value'
+                        }
+                    }]
+                }
+            }
+        };
+
+        $(function () {
+            var ctx = document.getElementById('myChart').getContext('2d');
+            window.myLine = new Chart(ctx, config);
+
             time = setInterval(function () {
                 CallAPI();
-            }, 2500);
+            }, 2000);
 
             $("#callApiBtn").click(function () {
                 CallAPI();
@@ -39,3 +114,4 @@
 
     </script>
 }
+
